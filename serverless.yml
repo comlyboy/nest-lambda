@@ -1,0 +1,64 @@
+# https://github.com/lalcebo/json-schema/blob/master/serverless/reference.json
+service: nest-lambda
+frameworkVersion: "3"
+useDotenv: true
+plugins:
+  - serverless-webpack
+  - serverless-prune-plugin
+  # - serverless-dotenv-plugin
+  - serverless-deployment-bucket
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+
+  webpack:
+    webpackConfig: "webpack.config.js" # Name of webpack configuration file
+    includeModules: true # Node modules configuration for packaging
+    keepOutputDirectory: true
+    packager: "npm" # Packager that will be used to package your external modules
+    excludeFiles: src/**/*.spec.ts # Provide a glob for files to ignore
+
+  app:
+    stage: ${opt:stage, 'development'}
+    region: ${opt:region, 'us-east-1'}
+
+provider:
+  name: aws
+  stage: ${self:custom.app.stage}
+  runtime: nodejs18.x
+  region: us-east-1
+  deploymentBucket:
+    name: ${self:service}
+  deploymentPrefix: backend
+
+  logs:
+    httpApi:
+      format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationErrorMessage": "$context.integrationErrorMessage" }'
+
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_ENV: ${self:custom.app.stage}
+
+  httpApi:
+    cors:
+      allowedOrigins: "*"
+      allowedHeaders:
+        - Content-Type
+        - Accept
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+        - X-Amz-User-Agent
+      allowedMethods: "*"
+      allowCredentials: false
+
+functions:
+  main:
+    name: ${self:service}-function-${self:custom.app.stage}
+    handler: dist/serverless.handler
+    timeout: 15
+    events:
+      - httpApi: "*"
