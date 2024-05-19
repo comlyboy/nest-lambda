@@ -2,11 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common';
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
+
+import { HttpExceptionFilter } from './filter/http-exception.filter';
 
 // https://stackoverflow.com/questions/68932747/adding-nestjs-as-express-module-results-in-nest-being-restarted
 // https://stackoverflow.com/questions/54349998/use-nestjs-package-in-nodejs-express-project/67719723#67719723

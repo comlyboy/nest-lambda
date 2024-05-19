@@ -31,17 +31,16 @@ provider:
   region: us-east-1
   deploymentBucket:
     name: ${self:service}
-  deploymentPrefix: backend
-
-  logs:
-    httpApi:
-      format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationErrorMessage": "$context.integrationErrorMessage" }'
+  deploymentPrefix: ${self:custom.config.name}
 
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     NODE_ENV: ${self:custom.app.stage}
+    NODE_OPTIONS: "--enable-source-maps"
 
   httpApi:
+    # https://www.serverless.com/framework/docs/providers/aws/events/http-api
+    shouldStartNameWithService: true
     cors:
       allowedOrigins: "*"
       allowedHeaders:
@@ -57,7 +56,7 @@ provider:
 
 functions:
   main:
-    name: ${self:service}-function-${self:custom.app.stage}
+    name: ${self:service}-${self:custom.config.stage}
     handler: dist/serverless.handler
     timeout: 15
     events:

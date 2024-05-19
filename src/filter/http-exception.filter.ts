@@ -1,7 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 
 import { Request, Response } from 'express';
-import { IError } from '../entities/error.interface';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,7 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		if (Array.isArray(message)) {
 			message = JSON.stringify(message);
 		}
-		const errorResult: { error: IError } = {
+		const errorResult: { error: any } = {
 			error: {
 				timestamp: new Date().toISOString(),
 				method: method,
